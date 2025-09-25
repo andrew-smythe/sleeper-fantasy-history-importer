@@ -25,14 +25,15 @@ DROP TABLE IF EXISTS `draftresults`;
 CREATE TABLE `draftresults` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(1000) NOT NULL,
-  `team` varchar(3) NOT NULL,
-  `position` varchar(3) NULL,
+  `team` varchar(3) DEFAULT NULL,
+  `position` varchar(3) DEFAULT NULL,
   `draftPosition` int NOT NULL,
   `teamId` int NOT NULL,
+  `source` enum('nfl','sleeper') NOT NULL DEFAULT 'nfl',
   PRIMARY KEY (`id`),
   KEY `draftTeamId_idx` (`teamId`),
   CONSTRAINT `draftTeamId` FOREIGN KEY (`teamId`) REFERENCES `teams` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2251 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -52,7 +53,7 @@ CREATE TABLE `matchups` (
   KEY `opponentId_idx` (`opponentId`),
   CONSTRAINT `matchupOpponentId` FOREIGN KEY (`opponentId`) REFERENCES `teams` (`id`),
   CONSTRAINT `matchupTeamId` FOREIGN KEY (`teamId`) REFERENCES `teams` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2345 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -66,7 +67,27 @@ CREATE TABLE `rosterpositions` (
   `id` int NOT NULL AUTO_INCREMENT,
   `position` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `sleeperplayers`
+--
+
+DROP TABLE IF EXISTS `sleeperplayers`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `sleeperplayers` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(1000) NOT NULL,
+  `team` varchar(3) DEFAULT NULL,
+  `rosterPositionId` int NOT NULL,
+  `lastUpdated` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `sleeperId` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `rosterPositionId_idx` (`rosterPositionId`),
+  CONSTRAINT `rosterPositionId` FOREIGN KEY (`rosterPositionId`) REFERENCES `rosterpositions` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3937 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -82,10 +103,11 @@ CREATE TABLE `teams` (
   `year` int DEFAULT NULL,
   `userId` int NOT NULL,
   `nflId` int DEFAULT NULL,
+  `sleeperId` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `userId_idx` (`userId`),
   CONSTRAINT `userId` FOREIGN KEY (`userId`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=155 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -103,12 +125,13 @@ CREATE TABLE `tradeplayers` (
   `name` varchar(1000) DEFAULT NULL,
   `team` varchar(3) DEFAULT NULL,
   `position` varchar(3) DEFAULT NULL,
+  `source` enum('nfl','sleeper') NOT NULL DEFAULT 'nfl',
   PRIMARY KEY (`id`),
   KEY `originalTeam_idx` (`originalTeamId`),
   KEY `newTeam_idx` (`newTeamId`),
   CONSTRAINT `newTeam` FOREIGN KEY (`newTeamId`) REFERENCES `teams` (`id`),
   CONSTRAINT `originalTeam` FOREIGN KEY (`originalTeamId`) REFERENCES `teams` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=289 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -124,12 +147,13 @@ CREATE TABLE `trades` (
   `team2` int NOT NULL,
   `vetoed` tinyint NOT NULL,
   `year` int NOT NULL,
+  `source` enum('nfl','sleeper') NOT NULL DEFAULT 'nfl',
   PRIMARY KEY (`id`),
   KEY `tradeTeam1_idx` (`team1`),
   KEY `tradeTeam2_idx` (`team2`),
   CONSTRAINT `tradeTeam1` FOREIGN KEY (`team1`) REFERENCES `teams` (`id`),
   CONSTRAINT `tradeTeam2` FOREIGN KEY (`team2`) REFERENCES `teams` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=91 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -143,7 +167,7 @@ CREATE TABLE `users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `username` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -186,12 +210,13 @@ CREATE TABLE `weeklyplayerstats` (
   `pointsAllowed` int DEFAULT NULL,
   `totalPoints` float DEFAULT NULL,
   `gameUrl` varchar(1000) DEFAULT NULL,
+  `source` enum('nfl','sleeper') NOT NULL DEFAULT 'nfl',
   PRIMARY KEY (`id`),
   KEY `teamId_idx` (`teamId`),
   KEY `positionId_idx` (`rosterPositionId`),
   CONSTRAINT `positionId` FOREIGN KEY (`rosterPositionId`) REFERENCES `rosterpositions` (`id`),
   CONSTRAINT `teamId` FOREIGN KEY (`teamId`) REFERENCES `teams` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=36502 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -203,4 +228,4 @@ CREATE TABLE `weeklyplayerstats` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-11-19 10:45:07
+-- Dump completed on 2025-09-25 12:52:23

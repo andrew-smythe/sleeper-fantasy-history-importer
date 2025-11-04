@@ -19,6 +19,7 @@ async function main() {
         await sleeper.importTrades(mysql, settings.leagueIds);
         await sleeper.importDrafts(mysql, settings.leagueIds);
         await sleeper.importLeagueSettings(mysql, settings.leagueIds);
+        await sleeper.importLeagueRosterSettings(mysql, settings.leagueIds);
 
         await mysql.close();
         console.log('Connection to DB closed.');
